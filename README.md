@@ -2,6 +2,31 @@
 
 Inspired by the [cookbook github action deployment guide](https://cookbook.arweave.dev/guides/deployment/github-action.html), `permaweb-deploy` is a Node.js command-line tool designed to streamline the deployment of web applications to the permaweb using Arweave. It uploads your build folder or a single file, creates Arweave manifests, and updates ArNS (Arweave Name Service) records via ANT (Arweave Name Token) with the transaction ID.
 
+## Load S3 Preview integration
+To use locally the load s3 `--preview` deployment integration:
+
+#### setup
+
+```bash
+pnpm install
+pnpm build
+
+pnpm link --global
+```
+
+#### deploy
+
+from your ui folder:
+
+```bash
+permaweb-deploy deploy --preview --deploy-folder ./dist --wallet ./wallet.json
+```
+if you want to avoid linking, run it directly from the repo:
+
+```bash
+node ./bin/run.js deploy --preview --deploy-folder /path-to-dist/dist --wallet /path-to-wallet/wallet.json
+```
+
 ## Features
 
 - **Turbo SDK Integration:** Uses Turbo SDK for fast, reliable file uploads to Arweave

@@ -6,14 +6,7 @@ import { promptDeployTarget } from '../prompts/deployment.js'
 import { promptSignerType } from '../prompts/wallet.js'
 import { createFlagConfig } from '../utils/config-resolver.js'
 import { TTL_MAX, TTL_MIN } from '../utils/constants.js'
-import {
-  resolveArioProcess,
-  validateArioProcess,
-  validateFileExists,
-  validateFolderExists,
-  validateTtl,
-  validateUndername,
-} from '../utils/validators.js'
+import { validateFileExists, validateFolderExists } from '../utils/validators.js'
 
 /**
  * Global flag definitions - single source of truth for all flags
@@ -25,14 +18,6 @@ export const globalFlags = {
       char: 'p',
       default: ARIO_MAINNET_PROCESS_ID,
       description: 'The ARIO process to use (mainnet, testnet, or process ID)',
-      async parse(input) {
-        const validation = validateArioProcess(input)
-        if (validation !== true) {
-          throw new Error(validation)
-        }
-
-        return resolveArioProcess(input)
-      },
       required: false,
     }),
     prompt: promptArioProcess,
@@ -122,14 +107,6 @@ export const globalFlags = {
       char: 't',
       default: '60',
       description: `ArNS TTL in seconds (${TTL_MIN}-${TTL_MAX})`,
-      async parse(input) {
-        const validation = validateTtl(input)
-        if (validation !== true) {
-          throw new Error(validation)
-        }
-
-        return input
-      },
       required: false,
     }),
   }),
@@ -138,14 +115,6 @@ export const globalFlags = {
       char: 'u',
       default: '@',
       description: 'ANT undername to update',
-      async parse(input) {
-        const validation = validateUndername(input)
-        if (validation !== true) {
-          throw new Error(validation)
-        }
-
-        return input
-      },
       required: false,
     }),
   }),
@@ -165,6 +134,13 @@ export const globalFlags = {
       required: false,
     }),
   }),
+  preview: createFlagConfig<boolean>({
+    flag: Flags.boolean({
+      description: 'Deploy to Load S3 preview endpoint (no ANT update)',
+      required: false,
+      default: false,
+    }),
+  }),
 }
 
 /**
@@ -182,6 +158,7 @@ export const deployFlags = {
   'ttl-seconds': globalFlags.ttlSeconds.flag,
   undername: globalFlags.undername.flag,
   wallet: globalFlags.wallet.flag,
+  preview: globalFlags.preview.flag,
 }
 
 /**
@@ -218,6 +195,7 @@ export interface DeployConfig {
   'ttl-seconds': string
   undername: string
   wallet?: string
+  preview?: boolean
 }
 
 /**
@@ -236,4 +214,5 @@ export const deployFlagConfigs = {
   'ttl-seconds': globalFlags.ttlSeconds,
   undername: globalFlags.undername,
   wallet: globalFlags.wallet,
+  preview: globalFlags.preview,
 } as const
