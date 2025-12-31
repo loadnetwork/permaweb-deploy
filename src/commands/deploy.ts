@@ -1,4 +1,5 @@
 import fs from 'node:fs'
+import { Readable } from 'node:stream'
 
 import { ANT, AOProcess, ARIO } from '@ar.io/sdk'
 import {
@@ -51,6 +52,36 @@ export default class Deploy extends Command {
     try {
       const { flags } = await this.parse(Deploy)
 
+      if (flags.anchor) {
+        const allowedLong = new Set(['--anchor', '--preview-id', '--wallet'])
+        const allowedShort = new Set(['-w'])
+        const disallowed: string[] = []
+
+        for (const arg of this.argv) {
+          if (!arg.startsWith('-')) {
+            continue
+          }
+
+          if (arg.startsWith('--')) {
+            const name = arg.split('=')[0]
+            if (!allowedLong.has(name)) {
+              disallowed.push(name)
+            }
+            continue
+          }
+
+          if (!allowedShort.has(arg)) {
+            disallowed.push(arg)
+          }
+        }
+
+        if (disallowed.length > 0) {
+          this.error(
+            `--anchor only allows --preview-id and --wallet (found ${disallowed.join(', ')})`,
+          )
+        }
+      }
+
       if (flags.preview) {
         const allowedLong = new Set(['--preview', '--deploy-folder', '--deploy-file', '--wallet'])
         const allowedShort = new Set(['-d', '-f', '-w'])
@@ -81,7 +112,7 @@ export default class Deploy extends Command {
         }
       }
 
-      const interactive = !flags.preview && !flags['arns-name']
+      const interactive = !flags.preview && !flags.anchor && !flags['arns-name']
 
       if (interactive) {
         this.log(chalk.cyan.bold('\n🎯 Interactive Deployment Mode\n'))
@@ -132,6 +163,8 @@ export default class Deploy extends Command {
         'on-demand': advancedOptions?.onDemand || baseConfig['on-demand'],
         'private-key': walletConfig.privateKey,
         preview: baseConfig.preview,
+        anchor: baseConfig.anchor,
+        'preview-id': baseConfig['preview-id'],
         'sig-type': baseConfig['sig-type'],
         'ttl-seconds': advancedOptions?.ttlSeconds || baseConfig['ttl-seconds'],
         undername: advancedOptions?.undername || baseConfig.undername,
@@ -169,6 +202,23 @@ export default class Deploy extends Command {
             'DEPLOY_KEY environment variable not set. Use --wallet, --private-key, or set DEPLOY_KEY',
           )
         }
+      }
+
+      if (deployConfig.anchor) {
+        if (!deployConfig['preview-id']) {
+          this.error('--preview-id is required when using --anchor')
+        }
+
+        if (!deployConfig.wallet) {
+          this.error('--wallet is required when using --anchor')
+        }
+
+        await anchorPreviewManifest({
+          previewId: deployConfig['preview-id'],
+          deployKey,
+        })
+
+        return
       }
 
       let arioProcess = deployConfig['ario-process']
@@ -376,4 +426,77 @@ export default class Deploy extends Command {
       throw error
     }
   }
+}
+
+async function anchorPreviewManifest({
+  previewId,
+  deployKey,
+}: {
+  previewId: string
+  deployKey: string
+}): Promise<void> {
+  const { signer, token } = createSigner('arweave', deployKey)
+  const turbo = TurboFactory.authenticated({
+    signer,
+    token,
+  })
+
+  const balance = await turbo.getBalance().catch(() => null)
+  if (balance) {
+    console.log(`Turbo balance: ${balance.winc}`)
+  }
+
+  const manifestResponse = await fetch(
+    `https://gateway.s3-node-1.load.network/resolve/${previewId}`,
+  )
+  if (!manifestResponse.ok) {
+    throw new Error(`Failed to fetch preview manifest: ${manifestResponse.status}`)
+  }
+
+  const manifest = (await manifestResponse.json()) as {
+    paths?: Record<string, { id?: string }>
+    fallback?: { id?: string }
+  }
+  const paths = manifest.paths || {}
+  const ids = new Set<string>()
+
+  for (const entry of Object.values(paths)) {
+    if (entry?.id) {
+      ids.add(entry.id)
+    }
+  }
+
+  if (manifest.fallback?.id) {
+    ids.add(manifest.fallback.id)
+  }
+
+  console.log(`Anchoring ${ids.size} dataitems from preview manifest`)
+
+  for (const id of ids) {
+    console.log(`Anchoring dataitem: ${id}`)
+    const binary = await fetch(`https://gateway.s3-node-1.load.network/binary/${id}`)
+    if (!binary.ok) {
+      throw new Error(`Failed to fetch dataitem binary: ${id}`)
+    }
+
+    const buffer = Buffer.from(await binary.arrayBuffer())
+    await turbo.uploadSignedDataItem({
+      dataItemStreamFactory: () => Readable.from(buffer),
+      dataItemSizeFactory: () => buffer.length,
+    })
+  }
+
+  const manifestBinary = await fetch(
+    `https://gateway.s3-node-1.load.network/binary/${previewId}`,
+  )
+  if (!manifestBinary.ok) {
+    throw new Error(`Failed to fetch manifest binary: ${previewId}`)
+  }
+
+  const manifestBuffer = Buffer.from(await manifestBinary.arrayBuffer())
+  await turbo.uploadSignedDataItem({
+    dataItemStreamFactory: () => Readable.from(manifestBuffer),
+    dataItemSizeFactory: () => manifestBuffer.length,
+  })
+  console.log(`Anchored manifest: ${previewId}`)
 }

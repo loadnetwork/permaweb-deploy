@@ -141,6 +141,19 @@ export const globalFlags = {
       default: false,
     }),
   }),
+  anchor: createFlagConfig<boolean>({
+    flag: Flags.boolean({
+      description: 'Anchor a Load S3 preview manifest to Arweave',
+      required: false,
+      default: false,
+    }),
+  }),
+  previewId: createFlagConfig<string | undefined>({
+    flag: Flags.string({
+      description: 'Load S3 preview manifest ID to anchor',
+      required: false,
+    }),
+  }),
 }
 
 /**
@@ -159,6 +172,8 @@ export const deployFlags = {
   undername: globalFlags.undername.flag,
   wallet: globalFlags.wallet.flag,
   preview: globalFlags.preview.flag,
+  anchor: globalFlags.anchor.flag,
+  'preview-id': globalFlags.previewId.flag,
 }
 
 /**
@@ -196,6 +211,8 @@ export interface DeployConfig {
   undername: string
   wallet?: string
   preview?: boolean
+  anchor?: boolean
+  'preview-id'?: string
 }
 
 /**
@@ -215,4 +232,6 @@ export const deployFlagConfigs = {
   undername: globalFlags.undername,
   wallet: globalFlags.wallet,
   preview: globalFlags.preview,
+  anchor: globalFlags.anchor,
+  'preview-id': globalFlags.previewId,
 } as const
