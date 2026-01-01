@@ -26,7 +26,13 @@ if you want to avoid linking, run it directly from the repo:
 ```bash
 node ./bin/run.js deploy --preview --deploy-folder /path-to-dist/dist --wallet /path-to-wallet/wallet.json
 ```
+### anchor
 
+to anchor load s3 preview deployment to Arweave while maintaining determinism and provenance:
+
+```bash
+permaweb-deploy deploy --anchor --preview-id <manifest-id> --wallet ./wallet.json
+```
 ## Features
 
 - **Turbo SDK Integration:** Uses Turbo SDK for fast, reliable file uploads to Arweave
