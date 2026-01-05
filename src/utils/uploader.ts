@@ -27,6 +27,10 @@ export async function uploadFile(
           name: 'Content-Type',
           value: mimeType,
         },
+        {
+          name: 'Variant',
+          value: 'Load-Network'
+        }
       ],
     },
     file: filePath,
@@ -54,6 +58,10 @@ export async function uploadFolder(
           name: 'anchor',
           value: new Date().toISOString(),
         },
+        {
+          name: 'Variant',
+          value: 'Load-Network'
+        }
       ],
     },
     folderPath,
