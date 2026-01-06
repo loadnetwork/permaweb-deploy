@@ -33,6 +33,22 @@ to anchor load s3 preview deployment to Arweave while maintaining determinism an
 ```bash
 permaweb-deploy deploy --anchor --preview-id <manifest-id> --wallet ./wallet.json
 ```
+
+### Resolving Arweave Manifests (Staging/Prod)
+
+For web apps deployed as offchain LS3 dataitems (arweave/paths manifest), the LS3 gateway can properly resolve the manifests under the `/resolve/preview/{manifest_dataitem_id}` endpoint; example: 
+
+* preview: https://gateway.s3-node-1.load.network/resolve/preview/n8nMf7oSQgBZDEw1mCsGslsp_zAZwmCf4AgTFHSC0C0 
+
+* manifest json file: https://gateway.s3-node-1.load.network/resolve/n8nMf7oSQgBZDEw1mCsGslsp_zAZwmCf4AgTFHSC0C0
+
+to resolve prod (Arweave settled) manifests, use the `/resolve/prod/{manifest_dataitem_id}` endpoint - this endpoint resolve anchored LS3 manifests as well as Arweave-first manifests: 
+
+* https://gateway.s3-node-1.load.network/resolve/prod/rquIQPiahInYInWyMACxEK4EU27VAt3FZXFPdPYI6vo
+
+* Source code: https://github.com/loadnetwork/load_hb/tree/s3-node-1/native/s3_nif/src/sidecar 
+
+
 ## Features
 
 - **Turbo SDK Integration:** Uses Turbo SDK for fast, reliable file uploads to Arweave
