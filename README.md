@@ -1,27 +1,37 @@
 # Permaweb Deploy
 
-Inspired by the [cookbook github action deployment guide](https://cookbook.arweave.dev/guides/deployment/github-action.html), `permaweb-deploy` is a Node.js command-line tool designed to streamline the deployment of web applications to the permaweb using Arweave. It uploads your build folder or a single file, creates Arweave manifests, and updates ArNS (Arweave Name Service) records via ANT (Arweave Name Token) with the transaction ID.
+> Inspired by the [cookbook github action deployment guide](https://cookbook.arweave.dev/guides/deployment/github-action.html), `permaweb-deploy` is a Node.js command-line tool designed to streamline the deployment of web applications to the permaweb using Arweave. It uploads your build folder or a single file, creates Arweave manifests, and updates ArNS (Arweave Name Service) records via ANT (Arweave Name Token) with the transaction ID.
 
-## Load S3 Preview integration
-To use locally the load s3 `--preview` deployment integration:
+## Load S3 integration
 
-#### setup
+#### npmjs package install
 
 ```bash
+npm i -g @loadnetwork/permaweb-deploy
+```
+
+#### dev install from source
+
+```bash
+git clone https://github.com/loadnetwork/permaweb-deploy
+cd permaweb-deploy
+
 pnpm install
 pnpm build
 
 pnpm link --global
 ```
 
+To use the `@loadnetwork/permaweb-deploy` CLI, you can use either `load-permaweb-deploy` or the fork's canonical `permaweb-deploy` cli name. to avoid conflicts, we advise using `load-permaweb-dpeloy` for load's fork.
+
 #### deploy
 
 from your ui folder:
 
 ```bash
-permaweb-deploy deploy --preview --deploy-folder ./dist --wallet ./wallet.json
+load-permaweb-deploy deploy --preview --deploy-folder ./dist --wallet ./wallet.json
 ```
-if you want to avoid linking, run it directly from the repo:
+[dev] if you want to avoid linking, run it directly from the repo:
 
 ```bash
 node ./bin/run.js deploy --preview --deploy-folder /path-to-dist/dist --wallet /path-to-wallet/wallet.json
@@ -31,7 +41,7 @@ node ./bin/run.js deploy --preview --deploy-folder /path-to-dist/dist --wallet /
 to anchor load s3 preview deployment to Arweave while maintaining determinism and provenance:
 
 ```bash
-permaweb-deploy deploy --anchor --preview-id <manifest-id> --wallet ./wallet.json
+load-permaweb-deploy deploy --anchor --preview-id <manifest-id> --wallet ./wallet.json
 ```
 
 ### Resolving Arweave Manifests (Staging/Prod)

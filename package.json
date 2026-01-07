@@ -1,6 +1,6 @@
 {
   "name": "@loadnetwork/permaweb-deploy",
-  "version": "2.5.1-loadnetwork.0",
+  "version": "2.5.1-loadnetwork.1",
   "description": "Permaweb App Deployment Package",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
