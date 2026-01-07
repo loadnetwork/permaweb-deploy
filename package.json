@@ -1,12 +1,13 @@
 {
-  "name": "permaweb-deploy",
-  "version": "2.5.1",
+  "name": "@loadnetwork/permaweb-deploy",
+  "version": "2.5.1-loadnetwork.0",
   "description": "Permaweb App Deployment Package",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
   "bin": {
-    "permaweb-deploy": "./bin/run.js"
+    "permaweb-deploy": "./bin/run.js",
+    "load-permaweb-deploy": "./bin/run.js"
   },
   "scripts": {
     "build": "vite build && tsc --emitDeclarationOnly",
@@ -98,12 +99,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/permaweb/permaweb-deploy.git"
+    "url": "git+https://github.com/loadnetwork/permaweb-deploy.git"
   },
-  "author": "NickJ202",
+  "author": "charmful0x",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/permaweb/permaweb-deploy/issues"
+    "url": "https://github.com/loadnetwork/permaweb-deploy/issues"
   },
-  "homepage": "https://github.com/permaweb/permaweb-deploy#readme"
+  "homepage": "https://github.com/loadnetwork/permaweb-deploy#readme"
 }
